@@ -61,7 +61,7 @@ module spi_engine_execution #(
 
   input sdi_data_ready,
   output reg sdi_data_valid,
-  output [(NUM_OF_SDI * DATA_WIDTH-1):0] sdi_data,
+  output [(NUM_OF_SDI * DATA_WIDTH)-1:0] sdi_data,
 
   input sync_ready,
   output reg sync_valid,
@@ -141,7 +141,7 @@ reg sdi_enabled = 1'b0;
 
 reg [(DATA_WIDTH-1):0] data_sdo_shift = 'h0;
 
-reg [SDI_DELAY+1:0] trigger_rx_d = {(SDI_DELAY+1){1'b0}};
+reg [SDI_DELAY+1:0] trigger_rx_d = {(SDI_DELAY+2){1'b0}};
 
 wire [1:0] inst = cmd[13:12];
 wire [1:0] inst_d1 = cmd_d1[13:12];
@@ -177,7 +177,7 @@ always @(posedge clk) begin
 end
 
 always @(posedge clk) begin
-  if (cmd_ready)
+  if (cmd_ready & cmd_valid)
    cmd_d1 <= cmd;
 end
 
@@ -397,14 +397,15 @@ assign sdo_int_s = data_sdo_shift[DATA_WIDTH-1];
 // be latched at one of the next consecutive SCLK edge.
 
 always @(posedge clk) begin
-  trigger_rx_d[0] <= trigger_rx;
-  trigger_rx_d[SDI_DELAY+1:1] <= trigger_rx_d[SDI_DELAY:0];
+  trigger_rx_d <= {trigger_rx_d, trigger_rx};
 end
 
 assign trigger_rx_s = trigger_rx_d[SDI_DELAY+1];
 
 // Load the serial data into SDI shift register(s), then link it to the output
 // register of the module
+
+wire cs_active_s = (inst_d1 == CMD_CHIPSELECT) & ~(&cmd_d1[NUM_OF_CS-1:0]);
 genvar i;
 generate
   for (i=0; i<NUM_OF_SDI; i=i+1) begin: g_sdi_shift_reg
@@ -412,14 +413,16 @@ generate
     reg [DATA_WIDTH-1:0] data_sdi_shift;
 
     always @(posedge clk) begin
-      if (inst_d1 == CMD_CHIPSELECT) begin
-        data_sdi_shift <= {DATA_WIDTH{1'b0}};
-      end else if (trigger_rx_s == 1'b1) begin
-        data_sdi_shift <= {data_sdi_shift[DATA_WIDTH-2:0], sdi[i]};
+      if (cs_active_s) begin
+        data_sdi_shift <= 0;
+      end else begin
+        if (trigger_rx_s == 1'b1) begin
+          data_sdi_shift <= {data_sdi_shift, sdi[i]};
+        end
       end
     end
 
-    assign sdi_data[((i+1)*DATA_WIDTH)-1:i*DATA_WIDTH] = data_sdi_shift;
+    assign sdi_data[i*DATA_WIDTH+:DATA_WIDTH] = data_sdi_shift;
 
   end
 endgenerate
