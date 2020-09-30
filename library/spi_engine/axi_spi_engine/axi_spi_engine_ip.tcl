@@ -96,7 +96,7 @@ set cc [ipx::current_core]
 ## ID
 set_property -dict [list \
   "value_validation_type" "range_long" \
-  "value_validation_range_minimum" "1" \
+  "value_validation_range_minimum" "0" \
   "value_validation_range_maximum" "255" \
  ] \
  [ipx::get_user_parameters ID -of_objects $cc]
@@ -149,6 +149,11 @@ set_property -dict [list \
   "value" "false" \
  ] \
  [ipx::get_user_parameters ASYNC_SPI_CLK -of_objects $cc]
+set_property -dict [list \
+  "value_format" "bool" \
+  "value" "false" \
+ ] \
+ [ipx::get_hdl_parameters ASYNC_SPI_CLK -of_objects $cc]
 
 ## NUM_OFFLOAD
 set_property -dict [list \

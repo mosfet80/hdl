@@ -45,6 +45,14 @@ proc p_elaboration {} {
   ad_interface signal  ctrl_enabled    output 1   enabled
   ad_interface signal  ctrl_mem_reset  input  1   reset
 
+  add_interface status_sync axi4stream start
+  add_interface_port status_sync status_sync_valid tvalid   output   1
+  add_interface_port status_sync status_sync_ready tready   input    1
+  add_interface_port status_sync status_sync_data  tdata    output   8
+
+  set_interface_property status_sync associatedClock if_spi_clk
+  set_interface_property status_sync associatedReset if_spi_resetn
+
   # SPI Engine interfaces
 
   ad_interface clock   spi_clk     input 1
@@ -93,7 +101,7 @@ proc p_elaboration {} {
   set_interface_property sync associatedReset if_spi_resetn
 
   ## Offload SDI data interface
-  
+
   add_interface offload_sdi axi4stream start
   add_interface_port offload_sdi offload_sdi_valid tvalid  output  1
   add_interface_port offload_sdi offload_sdi_ready tready  input   1
