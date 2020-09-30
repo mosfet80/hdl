@@ -54,13 +54,19 @@ proc adi_project {project_name {parameter_list {}}} {
     set system_qip_file system_bd/system_bd.qip
   }
 
+  if [regexp "_s10soc$" $project_name] {
+    set family "Stratix 10"
+    set device 1SX280LU2F50E2VGS2
+    set system_qip_file system_bd/system_bd.qip
+  }
+
   if [regexp "_c5soc$" $project_name] {
     set family "Cyclone V"
     set device 5CSXFC6D6F31C8ES
     set system_qip_file system_bd/synthesis/system_bd.qip
   }
 
-  if [regexp "de10nano$" $project_name] {
+  if [regexp "_de10nano$" $project_name] {
     set family "Cyclone V"
     set device 5CSEBA6U23I7DK
     set system_qip_file system_bd/synthesis/system_bd.qip
@@ -125,6 +131,7 @@ proc adi_project {project_name {parameter_list {}}} {
   }
 
   set QFILE [open "system_qsys_script.tcl" "w"]
+  puts $QFILE "set project_name $project_name"
   puts $QFILE "set mmu_enabled $mmu_enabled"
   puts $QFILE "set ad_hdl_dir $ad_hdl_dir"
   puts $QFILE "set ad_ghdl_dir $ad_ghdl_dir"
@@ -169,6 +176,10 @@ proc adi_project {project_name {parameter_list {}}} {
     set_global_assignment -name ENABLE_ADVANCED_IO_TIMING ON
 
   }
+
+  # source MESSAGE-DISABLE definitions - to ignore invalid critical warnings
+
+  source $ad_hdl_dir/projects/scripts/adi_intel_msg.tcl
 
   # default assignments
 

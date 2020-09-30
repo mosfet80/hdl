@@ -33,8 +33,8 @@ add_instance adrv9009_tx_jesd204 adi_jesd204
 set_instance_parameter_value adrv9009_tx_jesd204 {ID} {0}
 set_instance_parameter_value adrv9009_tx_jesd204 {TX_OR_RX_N} {1}
 set_instance_parameter_value adrv9009_tx_jesd204 {SOFT_PCS} {true}
-set_instance_parameter_value adrv9009_tx_jesd204 {LANE_RATE} {9830.4}
-set_instance_parameter_value adrv9009_tx_jesd204 {REFCLK_FREQUENCY} {245.76}
+set_instance_parameter_value adrv9009_tx_jesd204 {LANE_RATE} {2457.6}
+set_instance_parameter_value adrv9009_tx_jesd204 {REFCLK_FREQUENCY} {122.88}
 set_instance_parameter_value adrv9009_tx_jesd204 {NUM_OF_LANES} $TX_NUM_OF_LANES
 set_instance_parameter_value adrv9009_tx_jesd204 {LANE_MAP} {0 3 2 1}
 
@@ -55,9 +55,10 @@ add_instance adrv9009_rx_jesd204 adi_jesd204
 set_instance_parameter_value adrv9009_rx_jesd204 {ID} {1}
 set_instance_parameter_value adrv9009_rx_jesd204 {TX_OR_RX_N} {0}
 set_instance_parameter_value adrv9009_rx_jesd204 {SOFT_PCS} {true}
-set_instance_parameter_value adrv9009_rx_jesd204 {LANE_RATE} {9830.4}
-set_instance_parameter_value adrv9009_rx_jesd204 {REFCLK_FREQUENCY} {245.76}
+set_instance_parameter_value adrv9009_rx_jesd204 {LANE_RATE} {4915.2}
+set_instance_parameter_value adrv9009_rx_jesd204 {REFCLK_FREQUENCY} {122.88}
 set_instance_parameter_value adrv9009_rx_jesd204 {NUM_OF_LANES} $RX_NUM_OF_LANES
+set_instance_parameter_value adrv9009_rx_jesd204 {INPUT_PIPELINE_STAGES} {1}
 
 add_connection sys_clk.clk adrv9009_rx_jesd204.sys_clk
 add_connection sys_clk.clk_reset adrv9009_rx_jesd204.sys_resetn
@@ -76,9 +77,10 @@ add_instance adrv9009_rx_os_jesd204 adi_jesd204
 set_instance_parameter_value adrv9009_rx_os_jesd204 {ID} {1}
 set_instance_parameter_value adrv9009_rx_os_jesd204 {TX_OR_RX_N} {0}
 set_instance_parameter_value adrv9009_rx_os_jesd204 {SOFT_PCS} {true}
-set_instance_parameter_value adrv9009_rx_os_jesd204 {LANE_RATE} {9830.4}
-set_instance_parameter_value adrv9009_rx_os_jesd204 {REFCLK_FREQUENCY} {245.76}
+set_instance_parameter_value adrv9009_rx_os_jesd204 {LANE_RATE} {4915.2}
+set_instance_parameter_value adrv9009_rx_os_jesd204 {REFCLK_FREQUENCY} {122.88}
 set_instance_parameter_value adrv9009_rx_os_jesd204 {NUM_OF_LANES} $RX_OS_NUM_OF_LANES
+set_instance_parameter_value adrv9009_rx_os_jesd204 {INPUT_PIPELINE_STAGES} {1}
 
 add_connection sys_clk.clk adrv9009_rx_os_jesd204.sys_clk
 add_connection sys_clk.clk_reset adrv9009_rx_os_jesd204.sys_resetn
@@ -276,6 +278,8 @@ for {set i 0} {$i < 4} {incr i} {
   add_connection sys_clk.clk_reset avl_adxcfg_${i}.rcfg_reset_n
   add_connection avl_adxcfg_${i}.rcfg_m0 adrv9009_tx_jesd204.phy_reconfig_${i}
 
+  set_instance_parameter_value avl_adxcfg_${i} {ADDRESS_WIDTH} $xcvr_reconfig_addr_width
+
   if {$i < 2} {
     add_connection avl_adxcfg_${i}.rcfg_m1 adrv9009_rx_jesd204.phy_reconfig_${i}
   } else {
@@ -288,32 +292,32 @@ for {set i 0} {$i < 4} {incr i} {
 
 ad_cpu_interconnect 0x00020000 adrv9009_tx_jesd204.link_reconfig
 ad_cpu_interconnect 0x00024000 adrv9009_tx_jesd204.link_management
-ad_cpu_interconnect 0x00025000 adrv9009_tx_jesd204.link_pll_reconfig
-ad_cpu_interconnect 0x00026000 adrv9009_tx_jesd204.lane_pll_reconfig
-ad_cpu_interconnect 0x00028000 avl_adxcfg_0.rcfg_s0
-ad_cpu_interconnect 0x00029000 avl_adxcfg_1.rcfg_s0
-ad_cpu_interconnect 0x0002a000 avl_adxcfg_2.rcfg_s0
-ad_cpu_interconnect 0x0002b000 avl_adxcfg_3.rcfg_s0
-ad_cpu_interconnect 0x0002c000 axi_adrv9009_tx_dma.s_axi
+ad_cpu_interconnect 0x00026000 adrv9009_tx_jesd204.link_pll_reconfig
+ad_cpu_interconnect 0x00028000 adrv9009_tx_jesd204.lane_pll_reconfig
+ad_cpu_interconnect 0x0002a000 avl_adxcfg_0.rcfg_s0
+ad_cpu_interconnect 0x0002c000 avl_adxcfg_1.rcfg_s0
+ad_cpu_interconnect 0x0002e000 avl_adxcfg_2.rcfg_s0
+ad_cpu_interconnect 0x00030000 avl_adxcfg_3.rcfg_s0
+ad_cpu_interconnect 0x00032000 axi_adrv9009_tx_dma.s_axi
 
-ad_cpu_interconnect 0x00030000 adrv9009_rx_jesd204.link_reconfig
-ad_cpu_interconnect 0x00034000 adrv9009_rx_jesd204.link_management
-ad_cpu_interconnect 0x00035000 adrv9009_rx_jesd204.link_pll_reconfig
-ad_cpu_interconnect 0x00038000 avl_adxcfg_0.rcfg_s1
-ad_cpu_interconnect 0x00039000 avl_adxcfg_1.rcfg_s1
-ad_cpu_interconnect 0x0003c000 axi_adrv9009_rx_dma.s_axi
+ad_cpu_interconnect 0x00040000 adrv9009_rx_jesd204.link_reconfig
+ad_cpu_interconnect 0x00044000 adrv9009_rx_jesd204.link_management
+ad_cpu_interconnect 0x00046000 adrv9009_rx_jesd204.link_pll_reconfig
+ad_cpu_interconnect 0x00048000 avl_adxcfg_0.rcfg_s1
+ad_cpu_interconnect 0x0004a000 avl_adxcfg_1.rcfg_s1
+ad_cpu_interconnect 0x0004c000 axi_adrv9009_rx_dma.s_axi
 
-ad_cpu_interconnect 0x00040000 adrv9009_rx_os_jesd204.link_reconfig
-ad_cpu_interconnect 0x00044000 adrv9009_rx_os_jesd204.link_management
-ad_cpu_interconnect 0x00045000 adrv9009_rx_os_jesd204.link_pll_reconfig
-ad_cpu_interconnect 0x00048000 avl_adxcfg_2.rcfg_s1
-ad_cpu_interconnect 0x00049000 avl_adxcfg_3.rcfg_s1
-ad_cpu_interconnect 0x0004c000 axi_adrv9009_rx_os_dma.s_axi
+ad_cpu_interconnect 0x00050000 adrv9009_rx_os_jesd204.link_reconfig
+ad_cpu_interconnect 0x00054000 adrv9009_rx_os_jesd204.link_management
+ad_cpu_interconnect 0x00056000 adrv9009_rx_os_jesd204.link_pll_reconfig
+ad_cpu_interconnect 0x00058000 avl_adxcfg_2.rcfg_s1
+ad_cpu_interconnect 0x0005a000 avl_adxcfg_3.rcfg_s1
+ad_cpu_interconnect 0x0005c000 axi_adrv9009_rx_os_dma.s_axi
 
-ad_cpu_interconnect 0x00050000 axi_adrv9009_rx.s_axi
-ad_cpu_interconnect 0x00054000 axi_adrv9009_tx.s_axi
-ad_cpu_interconnect 0x00058000 axi_adrv9009_rx_os.s_axi
-ad_cpu_interconnect 0x00060000 avl_adrv9009_gpio.s1
+ad_cpu_interconnect 0x00060000 axi_adrv9009_rx.s_axi
+ad_cpu_interconnect 0x00064000 axi_adrv9009_tx.s_axi
+ad_cpu_interconnect 0x00068000 axi_adrv9009_rx_os.s_axi
+ad_cpu_interconnect 0x00070000 avl_adrv9009_gpio.s1
 
 # dma interconnects
 
